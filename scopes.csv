@@ -1,0 +1,4 @@
+space,site,network,dhcp_server,start_address,end_address,gateway,dns_servers,failover_channel
+Space name,Site name 1,10.0.0.0/24,DHCP server name,10.0.0.10,10.0.0.20,10.0.0.1,"10.0.0.2,10.0.0.3",FO name
+Space name,Site name 2,10.0.1.0/24,DHCP server name,10,20,1,"10.0.0.2,10.0.0.3",FO name
+Space name,Site name 3,10.0.2.0/23,DHCP server name,10.0.2.10,10.0.3.254,10.0.2.1,"10.0.0.2,10.0.0.3",FO name
