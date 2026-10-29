@@ -165,6 +165,17 @@ def _delete_flow(app):
         app.allow_used, app.site_filter = False, saved_filter
 
 
+# actions that print a report: wait for Enter so the output is not pushed off the screen by the menu
+PAUSE_AFTER = {"1", "2", "3", "4", "5", "l", "d"}
+
+
+def _pause():
+    try:
+        ui.ask("\n  Press Enter to continue... ")
+    except (EOFError, KeyboardInterrupt):
+        ui.tprint("")
+
+
 def run_menu(app):
     if not app.csv_path:
         _choose_csv(app)
@@ -222,3 +233,5 @@ def run_menu(app):
         except Exception as e:
             ui.log.exception("menu action failed")
             ui.tprint(ui.red(f"  error: {e}  (details in the log file)"))
+        if choice in PAUSE_AFTER:
+            _pause()

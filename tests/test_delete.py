@@ -275,7 +275,7 @@ def test_menu_delete_previews_then_asks_the_typed_phrase(cli_env, monkeypatch, t
     from eipdhcp.config import Settings
     st = Settings(host="h", logs_dir=str(tmp_path / "logs"), runs_dir=str(tmp_path / "runs"))
     app = App(st, Api(fake, sleep=lambda s: None), csv_path)
-    answers = iter(["3", "YES", "d", PHRASE1, "0"])
+    answers = iter(["3", "YES", "", "d", PHRASE1, "", "0"])
     monkeypatch.setattr(ui, "ask", lambda prompt: next(answers))
     run_menu(app)
     out = capsys.readouterr().out
@@ -304,7 +304,7 @@ def test_menu_offers_to_override_the_in_use_refusal(cli_env, monkeypatch, tmp_pa
     for ip in ("10.1.18.50", "10.1.18.51"):
         fake.addresses.append({"hostaddr": ip, "subnet_id": net["subnet_id"], "name": "pc"})
     # d -> refused -> YES to override -> typed DELETE phrase
-    answers = iter(["d", "YES", PHRASE1, "0"])
+    answers = iter(["d", "YES", PHRASE1, "", "0"])
     monkeypatch.setattr(ui, "ask", lambda prompt: next(answers))
     run_menu(app)
     out = capsys.readouterr().out
@@ -321,7 +321,7 @@ def test_menu_override_can_be_declined(cli_env, monkeypatch, tmp_path, capsys):
     net = [x for x in fake.subnets if x["is_terminal"] == "1"][0]
     net["subnet_ip_used_size"] = "2"
     fake.addresses.append({"hostaddr": "10.1.18.50", "subnet_id": net["subnet_id"], "name": "pc"})
-    answers = iter(["d", "", "0"])
+    answers = iter(["d", "", "", "0"])
     monkeypatch.setattr(ui, "ask", lambda prompt: next(answers))
     run_menu(app)
     assert fake.subnets and "Skipped." in capsys.readouterr().out

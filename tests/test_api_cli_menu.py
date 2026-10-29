@@ -113,7 +113,7 @@ def feed(monkeypatch, *answers):
 
 def test_menu_create_with_preview_and_confirmation(cli_env, monkeypatch, capsys):
     fake, app, _ = menu_app(cli_env)
-    feed(monkeypatch, "3", "YES", "0")
+    feed(monkeypatch, "3", "YES", "", "0")
     assert run_menu(app) == 0
     out = capsys.readouterr().out
     assert fake.scopes and "DRY" in out and "WET" in out
@@ -121,14 +121,14 @@ def test_menu_create_with_preview_and_confirmation(cli_env, monkeypatch, capsys)
 
 def test_menu_declining_changes_nothing(cli_env, monkeypatch):
     fake, app, _ = menu_app(cli_env)
-    feed(monkeypatch, "3", "no", "0")
+    feed(monkeypatch, "3", "no", "", "0")
     run_menu(app)
     assert not fake.writes()
 
 
 def test_menu_update_verify_and_last_run(cli_env, monkeypatch, capsys):
     fake, app, _ = menu_app(cli_env)
-    feed(monkeypatch, "3", "YES", "5", "4", "l", "0")
+    feed(monkeypatch, "3", "YES", "", "5", "", "4", "", "l", "", "0")
     run_menu(app)
     out = capsys.readouterr().out
     assert "verified" in out and "Nothing to change" in out and "created" in out
@@ -145,7 +145,7 @@ def test_menu_site_selection_parts_and_batch(cli_env, monkeypatch):
 def test_menu_bad_csv_does_not_crash(cli_env, monkeypatch, capsys):
     fake, app, tmp = menu_app(cli_env)
     app.csv_path = str(tmp / "missing.csv")
-    feed(monkeypatch, "2", "0")
+    feed(monkeypatch, "2", "", "0")
     assert run_menu(app) == 0
     assert "not found" in capsys.readouterr().out
 
@@ -155,7 +155,7 @@ def test_menu_batch_pause_still_works_after_the_menu_confirmation(cli_env, monke
     rows = "".join(f'TestSpace,S{i},10.2.{i}.0/24,smart.dhcp.example,10,200,10.2.{i}.1,"1.1.1.1",fo1.dhcp\n' for i in range(1, 4))
     open(app.csv_path, "w").write(HEADER + rows)
     app.batch = 2
-    feed(monkeypatch, "3", "YES", "n", "0")             # create -> confirm -> stop after the first batch -> exit
+    feed(monkeypatch, "3", "YES", "n", "", "0")             # create -> confirm -> stop after the first batch -> exit
     run_menu(app)
     assert len([s for s in fake.scopes if s["dhcp_id"] == "2"]) == 2
     out = capsys.readouterr().out
@@ -213,6 +213,19 @@ def test_menu_number_out_of_range_is_explained(tmp_path, monkeypatch, capsys):
     (tmp_path / "only.csv").write_text(HEADER + WM + "\n")
     monkeypatch.chdir(tmp_path)
     _, app = bare_app(tmp_path)
-    feed(monkeypatch, "5", "0")
+    feed(monkeypatch, "5", "", "0")
     run_menu(app)
     assert "there is no file number 5 (choose 1-1)" in capsys.readouterr().out and not app.csv_path
+
+
+def test_menu_waits_for_enter_after_a_run_but_not_after_a_setting(cli_env, monkeypatch, capsys):
+    fake, app, tmp = menu_app(cli_env)
+    prompts = []
+    answers = iter(["2", "", "k", "0"])          # dry run -> Enter -> toggle keep names (no pause) -> exit
+
+    def ask(prompt):
+        prompts.append(prompt)
+        return next(answers)
+    monkeypatch.setattr(ui, "ask", ask)
+    assert run_menu(app) == 0
+    assert sum("Press Enter to continue" in p for p in prompts) == 1
