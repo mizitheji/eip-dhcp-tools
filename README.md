@@ -18,16 +18,16 @@ See `.env.example` for the optional extras.
 ## Use
 
 ```bash
-python create_dhcp_scopes.py                          # interactive menu
-python create_dhcp_scopes.py scopes.csv --validate    # check CSV + server, read-only
-python create_dhcp_scopes.py scopes.csv --dry-run     # preview creating NEW sites
-python create_dhcp_scopes.py scopes.csv --wet-run --batch 10
-python create_dhcp_scopes.py scopes.csv --update --dry-run   # what differs on existing sites?
-python create_dhcp_scopes.py scopes.csv --update --wet-run
-python create_dhcp_scopes.py scopes.csv --verify      # read everything back and compare
-python create_dhcp_scopes.py scopes.csv --verify --site "Site name 1"
-python create_dhcp_scopes.py scopes.csv --delete --dry-run --site "Site name 1"
-python create_dhcp_scopes.py scopes.csv --delete --wet-run --site "Site name 1"
+python eip-dhcp.py                          # interactive menu
+python eip-dhcp.py scopes.csv --validate    # check CSV + server, read-only
+python eip-dhcp.py scopes.csv --dry-run     # preview creating NEW sites
+python eip-dhcp.py scopes.csv --wet-run --batch 10
+python eip-dhcp.py scopes.csv --update --dry-run   # what differs on existing sites?
+python eip-dhcp.py scopes.csv --update --wet-run
+python eip-dhcp.py scopes.csv --verify      # read everything back and compare
+python eip-dhcp.py scopes.csv --verify --site "Site name 1"
+python eip-dhcp.py scopes.csv --delete --dry-run --site "Site name 1"
+python eip-dhcp.py scopes.csv --delete --wet-run --site "Site name 1"
 ```
 
 | Action | What it does |

@@ -12,21 +12,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 EXAMPLES = """
 examples:
-  python create_dhcp_scopes.py                                   open the interactive menu
-  python create_dhcp_scopes.py scopes.csv --validate             check the CSV (and the server)
-  python create_dhcp_scopes.py scopes.csv --dry-run              preview creating new sites
-  python create_dhcp_scopes.py scopes.csv --wet-run --batch 10   create, asking after every 10 sites
-  python create_dhcp_scopes.py scopes.csv --update --dry-run     show what differs on existing sites
-  python create_dhcp_scopes.py scopes.csv --update --wet-run     fix those differences
-  python create_dhcp_scopes.py scopes.csv --verify               read everything back and compare
-  python create_dhcp_scopes.py scopes.csv --verify --site "Site name 1"
-  python create_dhcp_scopes.py scopes.csv --delete --dry-run --site "Site name 1"   preview a delete
-  python create_dhcp_scopes.py scopes.csv --delete --wet-run --site "Site name 1"   delete (typed confirmation)
+  python eip-dhcp.py                                   open the interactive menu
+  python eip-dhcp.py scopes.csv --validate             check the CSV (and the server)
+  python eip-dhcp.py scopes.csv --dry-run              preview creating new sites
+  python eip-dhcp.py scopes.csv --wet-run --batch 10   create, asking after every 10 sites
+  python eip-dhcp.py scopes.csv --update --dry-run     show what differs on existing sites
+  python eip-dhcp.py scopes.csv --update --wet-run     fix those differences
+  python eip-dhcp.py scopes.csv --verify               read everything back and compare
+  python eip-dhcp.py scopes.csv --verify --site "Site name 1"
+  python eip-dhcp.py scopes.csv --delete --dry-run --site "Site name 1"   preview a delete
+  python eip-dhcp.py scopes.csv --delete --wet-run --site "Site name 1"   delete (typed confirmation)
 """
 
 
 def build_parser():
-    ap = argparse.ArgumentParser(prog="create_dhcp_scopes.py", epilog=EXAMPLES,
+    ap = argparse.ArgumentParser(prog="eip-dhcp.py", epilog=EXAMPLES,
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  description="Create, update and verify DHCP + IPAM sites on SOLIDserver from a CSV.")
     ap.add_argument("csv_file", nargs="?", help="CSV with one row per network")
