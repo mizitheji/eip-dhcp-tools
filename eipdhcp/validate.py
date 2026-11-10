@@ -3,6 +3,8 @@ import ipaddress
 import logging
 from dataclasses import dataclass
 
+from .netindex import NetIndex
+
 log = logging.getLogger("dhcp_scopes")
 
 ERROR, WARN, INFO = "ERROR", "WARN", "INFO"
@@ -30,6 +32,7 @@ def validate_offline(sites):
         issues.append(Issue(level, s.line, s.name, msg))
 
     seen_net, seen_name = {}, {}
+    index = NetIndex()
     for s in sites:
         for p in s.problems:
             add(ERROR, s, p)
@@ -81,9 +84,9 @@ def validate_offline(sites):
             add(ERROR, s, f"network {net} is already listed on line {seen_net[key]}")
         else:
             seen_net[key] = s.line
-            for other_key, other_line in list(seen_net.items()):
-                if other_key != key and ipaddress.ip_network(other_key).overlaps(net):
-                    add(ERROR, s, f"{net} overlaps {other_key} (line {other_line})")
+            for other_net, other_line in index.overlapping(net):
+                add(ERROR, s, f"{net} overlaps {other_net} (line {other_line})")
+            index.add(net, s.line)
         lname = s.name.strip().lower()
         if lname:
             if lname in seen_name:
@@ -99,6 +102,15 @@ def validate_online(sites, api, skip_lines=(), action="create"):
 
     def add(level, s, msg):
         issues.append(Issue(level, s.line, s.name, msg))
+
+    indexes = {}                    # space id -> NetIndex of its terminal networks, built once
+
+    def existing_index(sid):
+        if sid not in indexes:
+            indexes[sid] = NetIndex()
+            for n, nid in api.terminal_networks(sid):
+                indexes[sid].add(n, nid)
+        return indexes[sid]
 
     for s in sites:
         if s.network is None or s.line in skip_lines:
@@ -120,10 +132,10 @@ def validate_online(sites, api, skip_lines=(), action="create"):
                 add(ERROR, s, f"failover server '{s.failover}' not found in DHCP -> Servers")
         try:
             if sid is not None:
-                for n, nid in api.terminal_networks(sid):
+                for n, nid in existing_index(sid).overlapping(s.network):
                     if n == s.network:
                         add(INFO, s, f"network already in IPAM (id={nid})" + ("; create reuses it" if action == "create" else ""))
-                    elif n.overlaps(s.network):
+                    else:
                         add(ERROR, s, f"{s.network} overlaps existing IPAM network {n} (id={nid})")
             if dhcp_id is not None:
                 scope = api.find_scope(dhcp_id, str(s.network.network_address))
